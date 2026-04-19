@@ -16,7 +16,9 @@ import About from './pages/About';
 import Portfolio from './pages/Portfolio';
 import SignUp from './pages/SignUp';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
 import ErrorBoundary from './components/ErrorBoundary';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // ─── Brand Logo SVG (matches FinForecaster Analytics logo style) ──────────────
 const BrandLogo = ({ size = 32 }) => (
@@ -198,12 +200,26 @@ const AppShell = () => (
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/disclaimer" element={<Navigate to="/about" replace />} />
-            <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/industry-overview" element={<ErrorBoundary><IndustryOverview /></ErrorBoundary>} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/industry-overview" element={
+                <ProtectedRoute>
+                    <ErrorBoundary><IndustryOverview /></ErrorBoundary>
+                </ProtectedRoute>
+            } />
 
-            <Route path="/company/:companyId" element={<CompanyLayout />}>
+            <Route path="/portfolio" element={
+                <ProtectedRoute>
+                    <Portfolio />
+                </ProtectedRoute>
+            } />
+
+            <Route path="/company/:companyId" element={
+                <ProtectedRoute>
+                    <CompanyLayout />
+                </ProtectedRoute>
+            }>
                 <Route path="overview" element={<ErrorBoundary><CompanyOverview /></ErrorBoundary>} />
                 <Route path="income-statement" element={<ErrorBoundary><IncomeStatement /></ErrorBoundary>} />
                 <Route path="balance-sheet" element={<ErrorBoundary><BalanceSheet /></ErrorBoundary>} />
@@ -212,6 +228,7 @@ const AppShell = () => (
                 <Route path="news" element={<ErrorBoundary><News /></ErrorBoundary>} />
                 <Route index element={<Navigate to="overview" replace />} />
             </Route>
+
 
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

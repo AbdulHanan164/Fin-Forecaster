@@ -3,26 +3,18 @@ import { Link } from 'react-router-dom';
 
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 const InfoSection = ({ icon, title, iconBg = 'bg-mint-100', iconColor = 'text-mint-700', children }) => (
-    <div className="card animate-slide-up">
+    <div className="card animate-slide-up bg-white rounded-2xl shadow-mint-lg border border-mint-100 p-8 mb-6 transition-transform hover:-translate-y-1">
         <div className="flex items-center gap-3 mb-4">
-            <div className={`w-10 h-10 ${iconBg} rounded-xl flex items-center justify-center ${iconColor} flex-shrink-0`}>
+            <div className={`w-12 h-12 ${iconBg} rounded-xl flex items-center justify-center ${iconColor} flex-shrink-0 shadow-sm border border-mint-50`}>
                 {icon}
             </div>
-            <h2 className="text-xl font-bold text-mint-900" style={{ fontFamily: 'Syne, sans-serif' }}>
+            <h2 className="text-xl font-bold text-mint-900 tracking-tight" style={{ fontFamily: 'Syne, sans-serif' }}>
                 {title}
             </h2>
         </div>
-        {children}
-    </div>
-);
-
-// ─── Disclaimer clause ────────────────────────────────────────────────────────
-const DisclaimerClause = ({ title, children }) => (
-    <div className="border-b border-mint-100 pb-4 last:border-0 last:pb-0">
-        <h3 className="text-sm font-bold text-mint-800 mb-1.5" style={{ fontFamily: 'Syne, sans-serif' }}>
-            {title}
-        </h3>
-        <div className="text-sm text-mint-600 leading-relaxed space-y-1.5">{children}</div>
+        <div className="text-mint-600 leading-relaxed space-y-4">
+            {children}
+        </div>
     </div>
 );
 
@@ -32,226 +24,131 @@ const About = () => {
 
             {/* Page Header */}
             <div
-                className="border-b border-mint-200"
+                className="border-b border-mint-200 shadow-sm relative overflow-hidden"
                 style={{ background: 'linear-gradient(135deg, #1A3D36 0%, #2D8C7A 100%)' }}
             >
-                <div className="container mx-auto px-4 py-12">
-                    <nav className="flex items-center gap-2 text-sm text-mint-300 mb-5">
-                        <Link to="/" className="hover:text-white transition-colors">Home</Link>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                        <span className="text-white font-medium">About</span>
-                    </nav>
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-10 pointer-events-none" 
+                     style={{ background: 'repeating-linear-gradient(45deg, #1F5148, #1F5148 10px, transparent 10px, transparent 20px)' }}>
+                </div>
+                
+                <div className="container mx-auto px-4 py-16 relative z-10 text-center">
                     <h1
-                        className="text-3xl font-extrabold text-white"
+                        className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight mb-4 animate-fade-in"
                         style={{ fontFamily: 'Syne, sans-serif' }}
                     >
                         About FinForecaster Analytics
                     </h1>
-                    <p className="text-mint-200 mt-2 max-w-2xl">
-                        A data-driven platform built to make Pakistan Stock Exchange analysis accessible
-                        to every investor and researcher.
+                    <p className="text-mint-100 text-lg sm:text-xl max-w-2xl mx-auto font-medium animate-slide-up">
+                        Empowering investors with institutional-grade insights, comprehensive market analytics, and intelligent portfolio tracking.
                     </p>
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 py-12 max-w-4xl space-y-6">
+            <div className="container mx-auto px-4 py-12 max-w-4xl">
 
-                {/* Mission */}
-                <InfoSection
-                    title="Our Mission"
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
-                        </svg>
-                    }
-                >
-                    <p className="text-mint-600 leading-relaxed">
-                        FinForecaster Analytics was developed as a Final Year Project to democratize financial
-                        analysis for Pakistani retail investors. The Pakistan Stock Exchange presents enormous
-                        opportunity, yet institutional-grade analytical tools have historically been inaccessible
-                        to the broader public. Our goal is to bridge that gap — providing comprehensive data
-                        views, ratio analysis, and portfolio tracking to anyone with an internet connection.
-                    </p>
-                </InfoSection>
-
-                {/* Platform Features */}
-                <InfoSection
-                    title="What the Platform Provides"
-                    iconBg="bg-mint-100"
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                    }
-                >
-                    <ul className="space-y-3 text-mint-600">
-                        {[
-                            'Complete financial statements — Income Statement, Balance Sheet, and Cash Flow with annual and quarterly periods',
-                            'Real-time stock quotes including live price, volume, and day range',
-                            'Key financial ratios covering valuation, profitability, liquidity, solvency, and growth metrics',
-                            'Industry-level overview with sector comparisons and aggregated market data',
-                            'Historical pricing data and real-time quotes',
-                            'Interactive charting and performance tracking',
-                            'Portfolio management — track holdings, compute real-time P&L, and analyze sector allocation',
-                        ].map((item, i) => (
-                            <li key={i} className="flex items-start gap-2.5">
-                                <svg className="w-4 h-4 text-mint-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                                </svg>
-                                <span>{item}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </InfoSection>
-
-                {/* Data Source */}
-                <InfoSection
-                    title="Data Source"
-                    iconBg="bg-emerald-50"
-                    iconColor="text-emerald-700"
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-                        </svg>
-                    }
-                >
-                    <div className="bg-mint-50 rounded-xl p-4 border border-mint-100">
-                        <div className="font-semibold text-mint-900 mb-1" style={{ fontFamily: 'Syne, sans-serif' }}>
-                            Financial Data API
-                        </div>
-                        <p className="text-sm text-mint-600">
-                            All financial statements, historical ratios, stock price data, equity statistics,
-                            and charting data are sourced via third-party financial data APIs.
-                            This includes income statements, balance sheets, cash flow statements, and
-                            comprehensive financial ratio time-series for fundamental analysis.
-                        </p>
-                    </div>
-                </InfoSection>
-
-                {/* Tech Stack */}
-                <InfoSection
-                    title="Built With"
-                    iconBg="bg-violet-50"
-                    iconColor="text-violet-700"
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
-                    }
-                >
-                    <div className="flex flex-wrap gap-2">
-                        {['React 18', 'Vite', 'Tailwind CSS', 'FastAPI', 'Python 3',
-                          'Recharts', 'React Router', 'Docker'].map(tech => (
-                            <span key={tech} className="badge-mint">{tech}</span>
-                        ))}
-                    </div>
-                </InfoSection>
-
-                {/* Disclaimer Section */}
-                <div id="disclaimer" className="card border-l-4 border-mint-600 animate-slide-up-delay-1">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <svg className="w-5 h-5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="grid gap-8">
+                    {/* The Vision */}
+                    <InfoSection
+                        title="Our Vision"
+                        icon={
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
-                        </div>
-                        <h2 className="text-xl font-bold text-mint-900" style={{ fontFamily: 'Syne, sans-serif' }}>
-                            Legal Disclaimer
-                        </h2>
-                    </div>
-
-                    {/* Primary notice */}
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-                        <p className="font-semibold text-amber-900 text-sm mb-1">Educational Purpose Only</p>
-                        <p className="text-sm text-amber-800 leading-relaxed">
-                            This platform is strictly for <strong>educational and research purposes</strong>. It does not constitute
-                            financial or investment advice. Do not rely solely on any data or algorithm presented here.
-                            Always conduct your own thorough research before making any investment decisions.
+                        }
+                    >
+                        <p>
+                            FinForecaster Analytics was founded on a simple premise: professional-grade financial intelligence should be accessible to everyone. Historically, the tools required to deeply analyze corporate financial health, manage portfolios in real-time, and track broader market movements have been locked behind complex platforms and institutional subscriptions. 
                         </p>
-                    </div>
+                        <p>
+                            We aim to democratize the financial markets. By transforming opaque financial statements into clear, actionable insights, we help retail investors, students, and financial analysts make informed, data-driven decisions with confidence.
+                        </p>
+                    </InfoSection>
 
-                    <div className="space-y-4">
-                        <DisclaimerClause title="Not Investment Advice">
-                            <p>
-                                All content, data, tools, charts, and analysis provided on this platform are strictly
-                                for informational and educational purposes. Nothing here constitutes, or should be
-                                construed as, financial advice, investment advice, trading advice, or any other
-                                type of professional advice. Always consult a licensed financial advisor before
-                                making investment decisions.
-                            </p>
-                        </DisclaimerClause>
+                    {/* What We Provide */}
+                    <InfoSection
+                        title="Comprehensive Market Intelligence"
+                        iconBg="bg-emerald-50"
+                        iconColor="text-emerald-700"
+                        icon={
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        }
+                    >
+                        <p>
+                            Our platform is a centralized hub for all your investment research needs. We aggregate vast amounts of corporate data and present it through beautifully organized, intuitive interfaces. 
+                        </p>
+                        <ul className="grid sm:grid-cols-2 gap-4 mt-4 text-mint-700 font-medium tracking-wide">
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Complete Financial Statements
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Live Pricing & Quotes
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                In-depth Valuation Ratios
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Interactive Performance Charts
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Real-time Sector Tracking
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                AI-Powered News Summaries
+                            </li>
+                        </ul>
+                    </InfoSection>
 
-                        <DisclaimerClause title="Algorithm Limitations">
-                            <p>
-                                FinForecaster Analytics may present algorithmic calculations, forecasts, ratios, or
-                                trend analyses generated from historical data and mathematical models.{' '}
-                                <strong className="text-mint-800">Past performance is never a guarantee of future results.</strong>{' '}
-                                Algorithms have inherent limitations and can produce incorrect outputs. Do not rely
-                                on any automated analysis without independently verifying the underlying data.
-                            </p>
-                        </DisclaimerClause>
-
-                        <DisclaimerClause title="Data Accuracy">
-                            <p>
-                                While every effort is made to provide accurate and timely information, FinForecaster
-                                Analytics makes no warranty — express or implied — regarding the accuracy,
-                                completeness, timeliness, or fitness for purpose of any data displayed. We are not 
-                                responsible for errors, omissions, or delays in that data.
-                            </p>
-                        </DisclaimerClause>
-
-                        <DisclaimerClause title="Investment Risk">
-                            <p>
-                                Investing in securities involves significant risk, including the possible loss of
-                                principal. Stock prices can fluctuate based on company performance, market
-                                conditions, economic factors, and geopolitical events. Always be fully aware of the 
-                                risks before committing capital.
-                            </p>
-                        </DisclaimerClause>
-
-                        <DisclaimerClause title="No Affiliation">
-                            <p>
-                                FinForecaster Analytics is an independent academic project. It is not affiliated
-                                with, endorsed by, or sponsored by any stock exchange, brokerage, or financial institution.
-                            </p>
-                        </DisclaimerClause>
-
-                        <DisclaimerClause title="Liability Waiver">
-                            <p>
-                                By using this platform, you acknowledge and agree that FinForecaster Analytics,
-                                its creators, and contributors shall not be held liable for any financial losses,
-                                damages, or adverse outcomes resulting from your use of or reliance on information
-                                provided herein. Use this platform at your own risk.
-                            </p>
-                        </DisclaimerClause>
-                    </div>
+                    {/* Portfolio Management */}
+                    <InfoSection
+                        title="Intelligent Portfolio Tracking"
+                        iconBg="bg-teal-50"
+                        iconColor="text-teal-700"
+                        icon={
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        }
+                    >
+                        <p>
+                            We go beyond static data entirely. The FinForecaster Portfolio suite allows investors to actively track their personal holdings in a simulated live environment.
+                        </p>
+                        <p>
+                            Log custom buy and sell transactions securely, monitor your sector allocation through dynamic visualization, and watch your unrealized and realized profit boundaries shift seamlessly in accordance with live market rates.
+                        </p>
+                    </InfoSection>
+                    
                 </div>
 
-                <div className="text-center pt-2">
-                    <Link to="/" className="btn-primary inline-flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <div className="text-center pt-8">
+                    <Link to="/signup" className="btn-primary inline-flex items-center gap-2 px-8 py-3 text-sm tracking-wide shadow-md hover:-translate-y-0.5 transition-transform">
+                        Create Your Free Account
+                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
-                        Back to Home
                     </Link>
                 </div>
 
             </div>
 
-            {/* Footer Disclaimer */}
-            <footer className="bg-white border-t border-mint-100 mt-8">
-                <div className="container mx-auto px-4 py-6 text-center">
-                    <p className="text-xs text-mint-400">
-                        FinForecaster Analytics — Educational research tool for PSX analysis.
-                        Data via AskAnalyst API. Not investment advice.
+            {/* Clean Professional Footer */}
+            <footer className="bg-white border-t border-mint-100 mt-12">
+                <div className="container mx-auto px-4 py-8 text-center flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-sm font-bold text-mint-900 tracking-tight" style={{ fontFamily: 'Syne, sans-serif' }}>
+                        FinForecaster<span className="text-mint-500">.pk</span>
+                    </p>
+                    <p className="text-xs text-mint-400 font-medium">
                         &copy; {new Date().getFullYear()} FinForecaster Analytics. All rights reserved.
                     </p>
                 </div>

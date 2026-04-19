@@ -2,213 +2,238 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const InputField = ({ label, id, type = 'text', value, onChange, error, placeholder, autoComplete }) => (
-    <div>
-        <label htmlFor={id} className="block text-sm font-semibold text-mint-700 mb-1.5"
-            style={{ fontFamily: 'Syne, sans-serif' }}>
-            {label}
-        </label>
-        <input
-            id={id}
-            type={type}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            autoComplete={autoComplete}
-            className={`input-field ${error ? 'border-red-400 focus:ring-red-400 focus:border-red-400' : ''}`}
-        />
-        {error && (
-            <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M12 9v2m0 4h.01M12 3C6.477 3 2 7.477 2 12s4.477 9 10 9 10-4.477 10-9S17.523 3 12 3z" />
-                </svg>
-                {error}
-            </p>
-        )}
-    </div>
-);
+// Basic password strength checker
+const calculateStrength = (password) => {
+    let score = 0;
+    if (!password) return { score: 0, label: '', color: 'bg-mint-100' };
+    if (password.length >= 6) score += 1;
+    if (password.length >= 8) score += 1;
+    if (/[A-Z]/.test(password)) score += 1;
+    if (/[0-9]/.test(password)) score += 1;
+    if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+    if (score < 2) return { score, label: 'Weak', color: 'bg-red-400', w: 'w-1/3' };
+    if (score < 4) return { score, label: 'Medium', color: 'bg-amber-400', w: 'w-2/3' };
+    return { score, label: 'Strong', color: 'bg-emerald-500', w: 'w-full' };
+};
 
 const SignUp = () => {
+    const { registerRequest, verifyOtp, loginAsDemo } = useAuth();
     const navigate = useNavigate();
-    const { signUp } = useAuth();
 
-    const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
-    const [errors, setErrors] = useState({});
-    const [serverError, setServerError] = useState('');
+    const [step, setStep] = useState(1); // 1: Details, 2: OTP
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+    const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
+    
+    // UI states
+    const [showPassword, setShowPassword] = useState(false);
+    
+    const strength = calculateStrength(formData.password);
 
-    const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
-
-    const validate = () => {
-        const e = {};
-        if (!form.name.trim()) e.name = 'Full name is required.';
-        if (!form.email.trim()) e.email = 'Email address is required.';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Enter a valid email address.';
-        if (!form.password) e.password = 'Password is required.';
-        else if (form.password.length < 8) e.password = 'Password must be at least 8 characters.';
-        if (!form.confirm) e.confirm = 'Please confirm your password.';
-        else if (form.confirm !== form.password) e.confirm = 'Passwords do not match.';
-        return e;
-    };
-
-    const handleSubmit = async (e) => {
+    const handleNext = async (e) => {
         e.preventDefault();
-        setServerError('');
-        const errs = validate();
-        setErrors(errs);
-        if (Object.keys(errs).length) return;
+        setError('');
+        setMessage('');
+        
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
+        if (strength.label === 'Weak') {
+            setError('Please use a stronger password');
+            return;
+        }
 
         setLoading(true);
         try {
-            await signUp({ name: form.name.trim(), email: form.email.trim(), password: form.password });
-            setSuccess(true);
-            setTimeout(() => navigate('/'), 2000);
+            await registerRequest(formData.name, formData.email, formData.password);
+            setMessage('A verification code has been sent to your email.');
+            setStep(2);
         } catch (err) {
-            setServerError(err.message || 'Registration failed. Please try again.');
+            setError(err.response?.data?.detail || err.message || 'Registration failed. Check network connection.');
         } finally {
             setLoading(false);
         }
     };
 
-    if (success) {
-        return (
-            <div className="min-h-screen bg-mint-50 flex items-center justify-center p-4">
-                <div className="bg-white border border-mint-100 rounded-2xl shadow-mint p-10 max-w-sm w-full text-center animate-fade-in">
-                    <div className="w-16 h-16 bg-mint-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-mint-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
-                    <h2 className="text-xl font-bold text-mint-900 mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
-                        Account Created
-                    </h2>
-                    <p className="text-mint-500 text-sm">
-                        Welcome to FinForecaster Analytics. Redirecting to the homepage...
-                    </p>
-                </div>
-            </div>
-        );
-    }
+    const handleVerify = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+        try {
+            await verifyOtp(formData.email, otp);
+            navigate('/portfolio');
+        } catch (err) {
+            setError(err.response?.data?.detail || err.message || 'OTP verification failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleDemoLogin = () => {
+        loginAsDemo();
+        navigate('/portfolio');
+    };
 
     return (
-        <div className="min-h-screen bg-mint-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-md animate-slide-up">
-
-                {/* Brand */}
-                <div className="text-center mb-8">
-                    <Link to="/" className="inline-flex flex-col items-center gap-1">
-                        <svg width="44" height="44" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="20" cy="20" r="20" fill="#2D8C7A" />
-                            <rect x="9" y="26" width="4" height="8" rx="1" fill="white" opacity="0.7" />
-                            <rect x="15" y="20" width="4" height="14" rx="1" fill="white" opacity="0.85" />
-                            <rect x="21" y="14" width="4" height="20" rx="1" fill="white" />
-                            <polyline points="10,22 16,16 22,18 31,10" stroke="#4ECDA4" strokeWidth="2.5"
-                                strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                            <polyline points="27,10 31,10 31,14" stroke="#4ECDA4" strokeWidth="2.5"
-                                strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                        </svg>
-                        <span
-                            className="text-2xl font-black text-mint-700 tracking-tight"
-                            style={{ fontFamily: 'Syne, sans-serif' }}
-                        >
-                            FinForecaster<span className="text-mint-400">.pk</span>
-                        </span>
-                    </Link>
-                    <p className="text-mint-500 text-sm mt-1">Pakistan Stock Exchange Analysis Platform</p>
-                </div>
-
-                <div className="bg-white border border-mint-100 rounded-2xl shadow-mint p-8">
-                    <h1
-                        className="text-xl font-bold text-mint-900 mb-1"
-                        style={{ fontFamily: 'Syne, sans-serif' }}
-                    >
-                        Create your account
+        <div className="min-h-[85vh] flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white border border-mint-100 rounded-[24px] shadow-mint-lg p-8 animate-fade-in relative z-10">
+                
+                <div className="text-center mb-6">
+                    <h1 className="text-3xl font-extrabold text-mint-900 tracking-tight" style={{ fontFamily: 'Syne, sans-serif' }}>
+                        Create Account
                     </h1>
-                    <p className="text-sm text-mint-500 mb-6">
-                        Already have an account?{' '}
-                        <Link to="/login" className="text-mint-600 hover:text-mint-800 font-semibold transition-colors">
-                            Log in
-                        </Link>
+                    <p className="text-sm text-mint-500 mt-2">
+                        {step === 1 ? 'Start analyzing the market today.' : 'Verify your email address.'}
                     </p>
-
-                    {serverError && (
-                        <div className="mb-5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 flex items-start gap-2">
-                            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {serverError}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                        <InputField
-                            label="Full Name"
-                            id="name"
-                            value={form.name}
-                            onChange={set('name')}
-                            error={errors.name}
-                            placeholder="Muhammad Ali"
-                            autoComplete="name"
-                        />
-                        <InputField
-                            label="Email Address"
-                            id="email"
-                            type="email"
-                            value={form.email}
-                            onChange={set('email')}
-                            error={errors.email}
-                            placeholder="you@example.com"
-                            autoComplete="email"
-                        />
-                        <InputField
-                            label="Password"
-                            id="password"
-                            type="password"
-                            value={form.password}
-                            onChange={set('password')}
-                            error={errors.password}
-                            placeholder="At least 8 characters"
-                            autoComplete="new-password"
-                        />
-                        <InputField
-                            label="Confirm Password"
-                            id="confirm"
-                            type="password"
-                            value={form.confirm}
-                            onChange={set('confirm')}
-                            error={errors.confirm}
-                            placeholder="Re-enter your password"
-                            autoComplete="new-password"
-                        />
-
-                        <p className="text-xs text-mint-400 leading-relaxed pt-1">
-                            By creating an account you acknowledge this platform is for{' '}
-                            <Link to="/about#disclaimer" className="text-mint-600 hover:underline">
-                                educational use only
-                            </Link>{' '}
-                            and does not provide investment advice.
-                        </p>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn-primary w-full flex items-center justify-center gap-2 mt-2"
-                        >
-                            {loading ? (
-                                <>
-                                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                    </svg>
-                                    Creating Account...
-                                </>
-                            ) : 'Create Account'}
-                        </button>
-                    </form>
                 </div>
+
+                {error && (
+                    <div className="bg-red-50 text-red-600 text-sm p-3 rounded-xl mb-6 border border-red-100 flex items-start gap-2 animate-slide-up">
+                        <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        {error}
+                    </div>
+                )}
+                
+                {message && (
+                    <div className="bg-emerald-50 text-emerald-700 text-sm p-3 rounded-xl mb-6 border border-emerald-100 flex items-start gap-2 animate-slide-up">
+                        <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                        {message}
+                    </div>
+                )}
+
+                {step === 1 ? (
+                    <form onSubmit={handleNext} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-mint-700 mb-1.5 ml-1" style={{ fontFamily: 'Syne, sans-serif' }}>Full Name</label>
+                            <input 
+                                required 
+                                type="text"
+                                className="input-field" 
+                                placeholder="e.g. Ali Khan" 
+                                value={formData.name}
+                                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-mint-700 mb-1.5 ml-1" style={{ fontFamily: 'Syne, sans-serif' }}>Email Address</label>
+                            <input 
+                                required 
+                                type="email"
+                                className="input-field" 
+                                placeholder="you@domain.com" 
+                                value={formData.email}
+                                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                            />
+                        </div>
+                        
+                        <div>
+                            <label className="block text-sm font-semibold text-mint-700 mb-1.5 ml-1" style={{ fontFamily: 'Syne, sans-serif' }}>Password</label>
+                            <div className="relative">
+                                <input 
+                                    required 
+                                    minLength="6"
+                                    type={showPassword ? "text" : "password"}
+                                    className="input-field pr-10" 
+                                    placeholder="At least 6 characters" 
+                                    value={formData.password}
+                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                />
+                                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-mint-400 hover:text-mint-600 transition-colors">
+                                    {showPassword ? (
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                                    ) : (
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    )}
+                                </button>
+                            </div>
+                            
+                            {/* Password Strength Bar */}
+                            {formData.password && (
+                                <div className="mt-2 ml-1">
+                                    <div className="h-1.5 w-full bg-mint-100 rounded-full overflow-hidden flex">
+                                        <div className={`h-full ${strength.color} ${strength.w} transition-all duration-300`}></div>
+                                    </div>
+                                    <p className={`text-[10px] mt-1 font-semibold ${strength.color.replace('bg-', 'text-')}`}>
+                                        Password Strength: {strength.label}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-mint-700 mb-1.5 ml-1 mt-2" style={{ fontFamily: 'Syne, sans-serif' }}>Confirm Password</label>
+                            <input 
+                                required 
+                                minLength="6"
+                                type={showPassword ? "text" : "password"}
+                                className="input-field" 
+                                placeholder="Re-enter password" 
+                                value={formData.confirmPassword}
+                                onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })}
+                            />
+                        </div>
+
+                        <button type="submit" disabled={loading} className="btn-primary w-full py-3 mt-4 relative overflow-hidden group">
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    Sending Code...
+                                </span>
+                            ) : 'Continue'}
+                        </button>
+                        
+                        <div className="pt-4 pb-2 border-t border-mint-100 mt-4 text-center">
+                            <button 
+                                type="button"
+                                onClick={handleDemoLogin}
+                                className="text-sm font-bold text-mint-500 hover:text-emerald-600 transition-colors w-full p-2"
+                            >
+                                Or continue as Demo User &rarr;
+                            </button>
+                        </div>
+
+                        <p className="text-center text-sm text-mint-500 font-medium">
+                            Already have an account? <Link to="/login" className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors">Log In</Link>
+                        </p>
+                    </form>
+                ) : (
+                    <form onSubmit={handleVerify} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-mint-700 mb-1.5 ml-1 text-center" style={{ fontFamily: 'Syne, sans-serif' }}>
+                                A 6-digit code was sent to <br/><span className="text-emerald-700 font-extrabold">{formData.email}</span>
+                            </label>
+                            <input 
+                                required 
+                                type="text"
+                                maxLength="6"
+                                className="input-field text-center text-2xl tracking-[0.5em] font-extrabold text-mint-900 mt-2" 
+                                placeholder="------" 
+                                value={otp}
+                                onChange={e => setOtp(e.target.value)}
+                            />
+                        </div>
+
+                        <button type="submit" disabled={loading || otp.length < 6} className="btn-primary w-full py-3 mt-6 relative overflow-hidden group">
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    Verifying...
+                                </span>
+                            ) : 'Verify & Create Account'}
+                        </button>
+
+                        <p className="text-center text-sm text-mint-500 mt-6 font-medium">
+                            <button type="button" onClick={() => setStep(1)} className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors">
+                                Change Email Address
+                            </button>
+                        </p>
+                    </form>
+                )}
             </div>
         </div>
     );

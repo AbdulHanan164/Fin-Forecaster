@@ -6,9 +6,11 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from datetime import datetime, date
 
 from scraper import scrape_company, scrape_equity, scrape_quote, scrape_market_summary, scrape_announcements
 from gemini_summarizer import analyze_announcement
+from auth import router as auth_router
 
 # ─────────────────────────────────────────────
 # APP SETUP
@@ -22,6 +24,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
 
 # ─────────────────────────────────────────────
 # LOAD COMPANY LIST

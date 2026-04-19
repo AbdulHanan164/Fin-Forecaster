@@ -1,57 +1,93 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext(null);
+const API_URL = 'http://localhost:8000/api/auth';
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const stored = localStorage.getItem('ff_user');
-        if (stored) {
+        // Hydrate from localStorage
+        const storedUser = localStorage.getItem('ff_user');
+        const token = localStorage.getItem('ff_token');
+        if (storedUser && token) {
             try {
-                setUser(JSON.parse(stored));
+                setUser(JSON.parse(storedUser));
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             } catch {
                 localStorage.removeItem('ff_user');
+                localStorage.removeItem('ff_token');
             }
         }
         setLoading(false);
     }, []);
 
-    const signUp = ({ name, email, password }) => {
-        // Store registered users list
-        const users = JSON.parse(localStorage.getItem('ff_users') || '[]');
-        const exists = users.find(u => u.email === email);
-        if (exists) {
-            throw new Error('An account with this email already exists.');
+    const setSession = (userData, token) => {
+        if (userData && token) {
+            localStorage.setItem('ff_user', JSON.stringify(userData));
+            localStorage.setItem('ff_token', token);
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            setUser(userData);
+        } else {
+            localStorage.removeItem('ff_user');
+            localStorage.removeItem('ff_token');
+            delete axios.defaults.headers.common['Authorization'];
+            setUser(null);
         }
-        const newUser = { id: Date.now(), name, email, createdAt: new Date().toISOString() };
-        users.push({ ...newUser, password });
-        localStorage.setItem('ff_users', JSON.stringify(users));
-        localStorage.setItem('ff_user', JSON.stringify(newUser));
-        setUser(newUser);
-        return newUser;
     };
 
-    const login = ({ email, password }) => {
-        const users = JSON.parse(localStorage.getItem('ff_users') || '[]');
-        const match = users.find(u => u.email === email && u.password === password);
-        if (!match) {
-            throw new Error('Invalid email or password.');
-        }
-        const { password: _p, ...safeUser } = match;
-        localStorage.setItem('ff_user', JSON.stringify(safeUser));
-        setUser(safeUser);
-        return safeUser;
+    const registerRequest = async (name, email, password) => {
+        const response = await axios.post(`${API_URL}/register`, { name, email, password });
+        return response.data;
+    };
+
+    const verifyOtp = async (email, otp) => {
+        const response = await axios.post(`${API_URL}/verify-otp`, { email, otp });
+        setSession(response.data.user, response.data.access_token);
+        return response.data.user;
+    };
+
+    const login = async (email, password) => {
+        const response = await axios.post(`${API_URL}/login`, { email, password });
+        setSession(response.data.user, response.data.access_token);
+        return response.data.user;
+    };
+
+    const forgotPassword = async (email) => {
+        const response = await axios.post(`${API_URL}/forgot-password`, { email });
+        return response.data;
+    };
+
+    const resetPassword = async (email, otp, newPassword) => {
+        const response = await axios.post(`${API_URL}/reset-password`, { email, otp, new_password: newPassword });
+        setSession(response.data.user, response.data.access_token);
+        return response.data.user;
+    };
+
+    const loginAsDemo = () => {
+        const demoUser = { id: 'demo_999', name: 'Demo User', email: 'demo@finforecaster.pk' };
+        setSession(demoUser, 'demo_mock_token_12345');
+        return demoUser;
     };
 
     const logout = () => {
-        localStorage.removeItem('ff_user');
-        setUser(null);
+        setSession(null, null);
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, signUp, login, logout }}>
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            login,
+            loginAsDemo,
+            logout,
+            verifyOtp,
+            registerRequest,
+            forgotPassword,
+            resetPassword
+        }}>
             {children}
         </AuthContext.Provider>
     );
