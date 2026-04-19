@@ -1,0 +1,96 @@
+# ─── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+MANIFEST
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+.installed.cfg
+
+# ─── Virtual Environments ─────────────────────────────────────────────────────
+venv/
+env/
+ENV/
+.venv/
+backend/venv/
+backend/.venv/
+
+# ─── Environment / Secrets ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.production
+*.pem
+*.key
+*.cert
+*.p12
+
+# ─── Node.js / Frontend ───────────────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# ─── Build Outputs ────────────────────────────────────────────────────────────
+dist/
+.output/
+.nuxt/
+.next/
+
+# ─── Jupyter Notebooks ────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ─── IDE / AI Tools ───────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.claude/
+.gemini/
+
+# ─── Testing ──────────────────────────────────────────────────────────────────
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+# ─── Debug / Temp Data Files ──────────────────────────────────────────────────
+debug_*.json
+
+# ─── Large / Binary Data Files (keep local only) ──────────────────────────────
+*.xls
+*.xlsx
+*.csv
+
+# ─── Project Reports (keep local only) ───────────────────────────────────────
+*.pdf
+*.docx
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+docker-compose.override.yml
